@@ -13,6 +13,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -75,6 +76,58 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+      - shared-api-network
+
+  # Fleet API Application
+  fleet-api:
+    build:
+      context: .
+      dockerfile: cmd/fleet-api/Dockerfile
+    container_name: fleet_api
+    ports:
+      - "8082:8081"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=auth_db
+      - FLEET_API_PORT=8081
+      - FLEET_API_JWT_SECRET=138B9bu6y5138B9bu6y5138B9bu6y513
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+      - shared-api-network
+
+  # Maintenance API Application
+  maintenance-api:
+    build:
+      context: .
+      dockerfile: cmd/maintenance-api/Dockerfile
+    container_name: maintenance_api
+    ports:
+      - "8084:8083"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=maintenance_db
+      - MAINTENANCE_API_PORT=8083
+      - MAINTENANCE_API_JWT_SECRET=138B9bu6y5138B9bu6y5138B9bu6y513
+    depends_on:
+      postgres:
         condition: service_healthy
     restart: unless-stopped
     networks:

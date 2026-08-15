@@ -122,6 +122,11 @@ migrate-up:
 	@chmod +x scripts/apply_pending_migrations.sh
 	@./scripts/apply_pending_migrations.sh
 
+# Apply maintenance API migrations to maintenance_db
+migrate-up-maintenance:
+	@chmod +x scripts/apply_maintenance_migrations.sh
+	@./scripts/apply_maintenance_migrations.sh
+
 # Rollback last migration (Auto-discovery)
 migrate-down:
 	@chmod +x scripts/rollback_last_migration.sh

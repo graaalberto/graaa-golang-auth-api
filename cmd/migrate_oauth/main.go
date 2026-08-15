@@ -30,6 +30,12 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	if !db.Migrator().HasTable(&models.Tenant{}) ||
+		!db.Migrator().HasTable(&models.Application{}) ||
+		!db.Migrator().HasTable(&models.OAuthProviderConfig{}) {
+		log.Fatal("Database schema is not initialized. Run `make migrate-up` before running cmd/migrate_oauth/main.go")
+	}
+
 	// Default App ID from migration 20260105_add_multi_tenancy.sql
 	appIDString := "00000000-0000-0000-0000-000000000001"
 	appID, err := uuid.Parse(appIDString)
